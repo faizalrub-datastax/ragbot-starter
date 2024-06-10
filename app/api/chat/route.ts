@@ -2,6 +2,12 @@ import OpenAI from 'openai';
 import {OpenAIStream, StreamingTextResponse} from 'ai';
 import {AstraDB} from "@datastax/astra-db-ts";
 
+// Print environment variables for debugging
+console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
+console.log("ASTRA_DB_APPLICATION_TOKEN:", process.env.ASTRA_DB_APPLICATION_TOKEN);
+console.log("ASTRA_DB_API_ENDPOINT:", process.env.ASTRA_DB_API_ENDPOINT);
+console.log("ASTRA_DB_NAMESPACE:", process.env.ASTRA_DB_NAMESPACE);
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -18,8 +24,9 @@ export async function POST(req: Request) {
     if (useRag) {
       const {data} = await openai.embeddings.create({input: latestMessage, model: 'text-embedding-ada-002'});
 
-      const collection = await astraDb.collection(`chat_${similarityMetric}`);
-
+      // const collection = await astraDb.collection(`chat_${similarityMetric}`);
+      const collection = await astraDb.collection(`langflow`);
+      
       const cursor= collection.find(null, {
         sort: {
           $vector: data[0]?.embedding,
